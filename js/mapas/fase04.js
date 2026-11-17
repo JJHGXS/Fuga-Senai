@@ -9,7 +9,6 @@ const MapaFase04 = {
         cena.background = new THREE.Color(0x141b16);
         cena.fog = new THREE.FogExp2(0x141b16, 0.015);
 
-        // Chão de terra e grama da arena fechada
         const chao = new THREE.Mesh(
             new THREE.PlaneGeometry(90, 90),
             new THREE.MeshLambertMaterial({ color: 0x364231 })
@@ -17,14 +16,12 @@ const MapaFase04 = {
         chao.rotation.x = -Math.PI / 2;
         cena.add(chao);
 
-        // Perímetro bloqueado por árvores caídas, troncos e mata fechada ao redor
         const raioArena = 34;
         for (let i = 0; i < 36; i++) {
             const ang = (i / 36) * Math.PI * 2;
             const x = Math.cos(ang) * raioArena;
             const z = Math.sin(ang) * raioArena;
 
-            // Tronco de árvore caída bloqueando a passagem
             const tronco = new THREE.Mesh(
                 new THREE.CylinderGeometry(0.9, 1.1, 7.5, 8),
                 new THREE.MeshLambertMaterial({ color: 0x4e3629 })
@@ -34,7 +31,6 @@ const MapaFase04 = {
             tronco.rotation.y = ang + Math.PI / 2;
             cena.add(tronco);
 
-            // Copa/arbusto denso atrás dos troncos
             const copa = new THREE.Mesh(
                 new THREE.DodecahedronGeometry(3.2),
                 new THREE.MeshLambertMaterial({ color: 0x1e4620 })
@@ -43,7 +39,6 @@ const MapaFase04 = {
             cena.add(copa);
         }
 
-        // Suprimentos espalhados pelas bordas da arena
         if (typeof Itens !== "undefined") {
             Itens.spawnarPickup(cena, "municao", -18, 12);
             Itens.spawnarPickup(cena, "municao", 18, 12);
@@ -52,21 +47,27 @@ const MapaFase04 = {
             Itens.spawnarPickup(cena, "kit_medico", 20, -14);
         }
 
-        // Spawna o Boss Gigante de 6 Metros (3 Fases: Bala -> Gasolina/Fogo -> Eletrocussão)
         if (typeof Zumbis !== "undefined") {
             this.bossRef = Zumbis.spawnar("boss_gigante_6m", 0, 0, -18);
         }
 
-        // Galões de Gasolina (Fase 2 do Boss: derramar no Boss e atirar para queimar)
-        const posGaloes = [
-            { x: -14, z: -8 },
-            { x: 14, z: -8 },
-            { x: -12, z: 16 },
-            { x: 12, z: 16 }
-        ];
-
+        const posGaloes = [{ x: -14, z: -8 }, { x: 14, z: -8 }, { x: -12, z: 16 }, { x: 12, z: 16 }];
         if (typeof Puzzles !== "undefined") {
             posGaloes.forEach((pos, idx) => {
-                Puzzles.criarItemMissao(
-                    cena,
-                    "galao
+                Puzzles.criarItemMissao(cena, "galao_gasolina", pos.x, 0, pos.z, `Galão de Gasolina #${idx + 1}`, () => {
+                    if (this.bossRef && this.bossRef.vida > 0) {
+                        this.bossRef.encharcadoGasolina = true;
+                        this.bossRef.mesh.material.color.setHex(0xd35400);
+                        Puzzles.mostrarAviso("⛽ Boss encharcado de gasolina! ATIRE NELE para atear fogo!");
+                    }
+                });
+            });
+
+            Puzzles.criarCaboEletricoArena(cena, -10, -20);
+            Puzzles.criarCaboEletricoArena(cena, 10, -20);
+        }
+
+        const elObj = document.getElementById("hud-objetivo");
+        if (elObj) elObj.textContent = "👹 BOSS COLOSSO (6m) — FASE 1: Descarregue munição até derrubá-lo!";
+    }
+};

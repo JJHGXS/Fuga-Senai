@@ -1,118 +1,92 @@
 /* ==========================================================================
-   js/equipamentos/itens.js - Suprimentos, Puzzles, Caixa de Munição e Torretas
+   js/equipamentos/itens.js - Pickups de Munição, Kit Médico, Pílulas e Torreta
    ========================================================================== */
 
 const Itens = {
-    ativos: [],       // Itens espalhados no chão ou implantados (torretas/caixas)
-    fusiveisColetados: 0,
-    chavesColetadas: 0,
+    pickups: [],
+    torretas: [],
+    cena: null,
 
-    limparTudo(cena) {
-        if (cena) {
-            this.ativos.forEach(item => {
-                if (item.mesh) cena.remove(item.mesh);
-            });
-        }
-        this.ativos = [];
-        this.fusiveisColetados = 0;
-        this.chavesColetadas = 0;
+    limpar(cena) {
+        this.cena = cena;
+        this.pickups.forEach((p) => cena.remove(p.mesh));
+        this.torretas.forEach((t) => cena.remove(t.mesh));
+        this.pickups = [];
+        this.torretas = [];
     },
 
-    // Cria um item coletável no mapa (kit_medico, pilulas, municao, fusivel, chave, arma)
-    criarItemChao(tipo, x, y, z, dadosExtras = {}) {
-        if (typeof MotorJogo === "undefined" || !MotorJogo.cena) return null;
-
-        let cor = 0xffffff;
-        let tamanho = new THREE.Vector3(0.55, 0.35, 0.55);
-
-        if (tipo === "kit_medico") {
-            cor = 0xff3b3b; // Vermelho com cruz branca
-        } else if (tipo === "pilulas") {
-            cor = 0xff9f43; // Laranja (recupera vida + estamina)
-            tamanho.set(0.32, 0.42, 0.32);
-        } else if (tipo === "municao") {
-            cor = 0x2ecc71; // Verde militar
-        } else if (tipo === "fusivel") {
-            cor = 0xf1c40f; // Amarelo brilhante (item de puzzle)
-            tamanho.set(0.28, 0.5, 0.28);
-        } else if (tipo === "chave") {
-            cor = 0x00d2ff; // Ciano neon (item de puzzle)
-            tamanho.set(0.4, 0.2, 0.2);
-        } else if (tipo === "arma_chao") {
-            cor = 0x9b59b6; // Roxo para caixas de armas raras
-            tamanho.set(0.9, 0.3, 0.4);
-        }
-
-        const geo = new THREE.BoxGeometry(tamanho.x, tamanho.y, tamanho.z);
-        const mat = new THREE.MeshLambertMaterial({ color: cor });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(x, y + 0.35, z);
-
-        MotorJogo.cena.add(mesh);
-
-        const item = {
-            tipo,
-            mesh,
-            posicao: mesh.position,
-            coletavel: true,
-            dadosExtras,
-            tempoVida: null
+    spawnarPickup(cena, tipo, x, z) {
+        this.cena = cena;
+        const cores = {
+            municao: 0xf1c40f,
+            kit_medico: 0x2ecc71,
+            pilulas: 0x3498db
         };
 
-        this.ativos.push(item);
-        return item;
-    },
-
-    // Habilidade do Luan (Tecla Q): Solta uma Caixa de Munição no chão
-    criarCaixaMunicao(posicaoJogador) {
-        if (typeof MotorJogo === "undefined" || !MotorJogo.cena) return;
-
         const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(0.75, 0.45, 0.55),
-            new THREE.MeshLambertMaterial({ color: 0x27ae60 })
+            new THREE.BoxGeometry(0.7, 0.5, 0.7),
+            new THREE.MeshLambertMaterial({ color: cores[tipo] || 0xffffff })
         );
-        mesh.position.set(posicaoJogador.x, 0.25, posicaoJogador.z - 1.2);
-        MotorJogo.cena.add(mesh);
+        mesh.position.set(x, 0.4, z);
+        cena.add(mesh);
 
-        this.ativos.push({
-            tipo: "caixa_luan",
-            mesh,
-            posicao: mesh.position,
-            coletavel: true,
-            usosRestantes: 4, // Até 4 jogadores podem reabastecer
-            tempoVida: 45
-        });
-
-        console.log("Luan implantou uma Caixa de Munição!");
+        this.pickups.push({ tipo, mesh, coletado: false });
     },
 
-    // Passiva do Luan (A cada 20 Kills): Constrói uma Torreta Automática SENAI
-    criarTorreta(posicaoJogador, duracaoSeg = 25) {
-        if (typeof MotorJogo === "undefined" || !MotorJogo.cena) return;
-
-        const grupo = new THREE.Group();
-
-        // Tripé / Base
-        const base = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.35, 0.5, 0.7, 8),
-            new THREE.MeshLambertMaterial({ color: 0x2c3e50 })
+    implantarTorreta(posJogador, yaw) {
+        if (!this.cena) return;
+        const frente = new THREE.Vector3(0, 0, -2.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 1.1, 0.8),
+            new THREE.MeshLambertMaterial({ color: 0xe67e22 })
         );
-        base.position.y = 0.35;
+        mesh.position.set(posJogador.x + frente.x, 0.55, posJogador.z + frente.z);
+        this.cena.add(mesh);
 
-        // Cabeça giratória e cano
-        const cabeca = new THREE.Mesh(
-            new THREE.BoxGeometry(0.45, 0.35, 0.65),
-            new THREE.MeshLambertMaterial({ color: 0xe74c3c })
-        );
-        cabeca.position.y = 0.85;
+        this.torretas.push({ mesh, vidaTempo: 25, cooldownTiro: 0 });
+    },
 
-        const cano = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.06, 0.06, 0.6, 8),
-            new THREE.MeshLambertMaterial({ color: 0x111111 })
-        );
-        cano.rotation.x = Math.PI / 2;
-        cano.position.set(0, 0.85, -0.45);
+    atualizar(delta) {
+        if (typeof Jogador === "undefined") return;
 
-        grupo.add(base, cabeca, cano);
-        grupo.position.set(posicaoJogador.x + 1.2, 0, posicaoJogador.z - 1.2);
-        MotorJogo.cena
+        // Coleta de suprimentos no chão
+        for (let i = this.pickups.length - 1; i >= 0; i--) {
+            const p = this.pickups[i];
+            p.mesh.rotation.y += 2 * delta;
+
+            if (Jogador.posicao.distanceTo(p.mesh.position) <= 2.0) {
+                if (p.tipo === "kit_medico") {
+                    Jogador.curar(50, "kit");
+                } else if (p.tipo === "pilulas") {
+                    Jogador.curar(25, "pilulas");
+                } else if (p.tipo === "municao" && typeof SistemaArmas !== "undefined") {
+                    SistemaArmas.reabastecerTudo();
+                }
+
+                if (this.cena) this.cena.remove(p.mesh);
+                this.pickups.splice(i, 1);
+            }
+        }
+
+        // Disparo automático das torretas do Luan
+        for (let i = this.torretas.length - 1; i >= 0; i--) {
+            const t = this.torretas[i];
+            t.vidaTempo -= delta;
+            t.cooldownTiro -= delta;
+
+            if (t.vidaTempo <= 0) {
+                if (this.cena) this.cena.remove(t.mesh);
+                this.torretas.splice(i, 1);
+                continue;
+            }
+
+            if (t.cooldownTiro <= 0 && typeof Zumbis !== "undefined" && Zumbis.lista.length > 0) {
+                const alvo = Zumbis.lista.find((z) => z.mesh.position.distanceTo(t.mesh.position) <= 22);
+                if (alvo) {
+                    Zumbis.aplicarDano(alvo, 18);
+                    t.cooldownTiro = 0.35;
+                }
+            }
+        }
+    }
+};
