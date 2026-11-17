@@ -5,22 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fuga para o SENAI - Luiz Pagliato FPS</title>
     <link rel="stylesheet" href="css/estilo.css">
-    <!-- Biblioteca 3D Three.js para o motor estilo Krunker -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Biblioteca Supabase Realtime para o Multiplayer Co-op -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- Fundo 3D / Canvas do Jogo -->
     <div id="game-container"></div>
 
-    <!-- ==========================================
-         TELA INICIAL (LOBBY ESTILO KRUNKER / L4D)
-         ========================================== -->
+    <!-- TELA INICIAL (LOBBY) -->
     <div id="tela-inicial" class="overlay-lobby">
         
-        <!-- Barra Superior -->
         <header class="lobby-topbar">
             <div class="player-badge">
                 <span class="badge-icon">🎓</span>
@@ -46,17 +40,15 @@
             </div>
         </header>
 
-        <!-- Conteúdo Central em 2 Colunas Equilibradas -->
         <main class="lobby-grid">
             
-            <!-- COLUNA ESQUERDA: Título, Fase Atual, Personagem e Modos -->
+            <!-- COLUNA ESQUERDA -->
             <section class="painel-esquerda">
                 <div class="logo-area">
                     <span class="tag-genero" id="txt-subgenero">SURVIVAL FPS • SOROCABA / VOTORANTIM</span>
                     <h1 id="titulo-jogo">FUGA PARA O <span class="destaque-vermelho">SENAI</span></h1>
                 </div>
 
-                <!-- Card da Fase Atual -->
                 <div class="card-fase-atual">
                     <div class="fase-header">
                         <span class="fase-badge" id="label-fase-num">FASE 01 / 88</span>
@@ -75,4 +67,160 @@
                         <option value="nicolas">Nicolas Gregorio — Tanker (Armas Pesadas & Muita Vida)</option>
                         <option value="luan">Luan — Engenheiro (Corpo a Corpo, Leves, Munição & Torreta)</option>
                         <option value="rodrigo">Rodrigo — Médico (Rápido & Kit Médico 50% a cada 5 Kills)</option>
-                        <option
+                        <option value="kaua">Kaua — Sniper (Dano Massivo & Crítico a cada 3 Tiros)</option>
+                        <option value="joao_cba">João CBA — Juggernaut/Assault (Berserker & Cura por Tiro)</option>
+                    </select>
+                </div>
+
+                <!-- Botões Principais -->
+                <div class="modos-container">
+                    <button id="btn-singleplayer" class="btn-jogar btn-single">
+                        <div class="btn-info">
+                            <span class="btn-titulo" id="txt-single">JOGAR SOLO (CAMPANHA)</span>
+                            <span class="btn-sub" id="txt-single-sub">Enfrente a horda sozinho rumo ao Luiz Pagliato</span>
+                        </div>
+                        <span class="btn-seta">▶</span>
+                    </button>
+
+                    <button id="btn-multiplayer" class="btn-jogar btn-multi">
+                        <div class="btn-info">
+                            <span class="btn-titulo" id="txt-multi">MULTIPLAYER CO-OP (4 JOGADORES)</span>
+                            <span class="btn-sub" id="txt-multi-sub">Criar sala ou entrar com amigos da turma</span>
+                        </div>
+                        <span class="btn-seta">👥</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- COLUNA DIREITA -->
+            <section class="painel-direita">
+                <div class="config-tabs">
+                    <button class="tab-btn active" data-tab="tab-geral" id="btn-tab-geral">⚙️ GERAL & ÁUDIO</button>
+                    <button class="tab-btn" data-tab="tab-video" id="btn-tab-video">🖥️ VÍDEO & MIRA</button>
+                </div>
+
+                <div id="tab-geral" class="tab-content active">
+                    <div class="opcao-grupo">
+                        <label for="select-tamanho" id="label-tamanho">Tamanho / Resolução da Tela</label>
+                        <select id="select-tamanho">
+                            <option value="1">100% - Alta Qualidade (Nativa)</option>
+                            <option value="0.75">75% - Desempenho Balanceado</option>
+                            <option value="0.5">50% - Modo Batata (FPS Máximo)</option>
+                            <option value="fullscreen">⛶ Tela Cheia (Fullscreen)</option>
+                        </select>
+                    </div>
+                    <div class="opcao-grupo">
+                        <label for="range-volume"><span id="label-volume">Volume Geral</span> <strong id="valor-volume">80%</strong></label>
+                        <input type="range" id="range-volume" min="0" max="100" value="80">
+                    </div>
+                    <div class="opcao-grupo">
+                        <label for="range-musica"><span id="label-musica">Música de Tensão</span> <strong id="valor-musica">50%</strong></label>
+                        <input type="range" id="range-musica" min="0" max="100" value="50">
+                    </div>
+                    <div class="opcao-grupo">
+                        <label for="range-sens"><span id="label-sens">Sensibilidade do Mouse</span> <strong id="valor-sens">1.0x</strong></label>
+                        <input type="range" id="range-sens" min="0.2" max="3.0" step="0.1" value="1.0">
+                    </div>
+                </div>
+
+                <div id="tab-video" class="tab-content">
+                    <div class="opcao-grupo">
+                        <label for="range-fov"><span id="label-fov">Campo de Visão (FOV)</span> <strong id="valor-fov">85°</strong></label>
+                        <input type="range" id="range-fov" min="60" max="110" value="85">
+                    </div>
+                    <div class="opcao-grupo">
+                        <label for="select-mira-cor" id="label-mira">Cor da Mira</label>
+                        <select id="select-mira-cor">
+                            <option value="#00ff66">Verde Neon</option>
+                            <option value="#ff3b3b">Vermelho Tático</option>
+                            <option value="#00e5ff">Ciano Krunker</option>
+                            <option value="#ffffff">Branco Puro</option>
+                        </select>
+                    </div>
+                    <div class="opcao-check">
+                        <input type="checkbox" id="check-fps" checked>
+                        <label for="check-fps" id="label-fps">Mostrar Contador de FPS</label>
+                    </div>
+                </div>
+
+                <div class="controles-rapidos">
+                    <span><b>[W,A,S,D]</b> Mover</span>
+                    <span><b>[ESPAÇO]</b> Pular / Slide</span>
+                    <span><b>[SHIFT]</b> Correr</span>
+                    <span><b>[R]</b> Recarregar</span>
+                    <span><b>[F]</b> Lanterna</span>
+                    <span><b>[Q]</b> Habilidade</span>
+                    <span><b>[E]</b> Interagir / Levantar</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: MAPA DAS 88 FASES -->
+    <div id="modal-fases" class="modal-oculto">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>🗺️ ROTA DE FUGA: VOTORANTIM ➔ SENAI LUIZ PAGLIATO (88 FASES)</h2>
+                <button id="btn-fechar-fases" class="btn-fechar">✖</button>
+            </div>
+            <div class="lista-fases-grid" id="grid-88-fases"></div>
+        </div>
+    </div>
+
+    <!-- HUD DURANTE A GAMEPLAY -->
+    <div id="hud-jogo" class="oculto">
+        <div id="fps-counter">FPS: 60</div>
+        <div class="hud-topo-centro">
+            <span id="hud-fase-nome">Fase 01: O Surto no Terreno Baldio</span>
+            <span id="hud-objetivo">Sobreviva e cumpra os objetivos do setor!</span>
+        </div>
+        <div id="mira">
+            <div class="mira-linha mira-top"></div>
+            <div class="mira-linha mira-bottom"></div>
+            <div class="mira-linha mira-left"></div>
+            <div class="mira-linha mira-right"></div>
+            <div class="mira-ponto"></div>
+        </div>
+        <div class="hud-inferior">
+            <div class="hud-box hud-vida">
+                <span class="hud-label" id="hud-label-saude">SAÚDE</span>
+                <div class="barra-fundo"><div id="barra-vida" class="barra-preenchimento"></div></div>
+                <span id="texto-vida" class="hud-valor">100</span>
+            </div>
+            <div class="hud-box hud-arma">
+                <span id="nome-arma" class="hud-label">RIFLE TÁTICO</span>
+                <span id="texto-municao" class="hud-valor">30 / 120</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DO JOGO -->
+    <script src="js/config.js"></script>
+    <script src="js/sistema/loading.js"></script>
+    <script src="js/sistema/progresso.js"></script>
+    <script src="js/sistema/reanimacao.js"></script>
+    <script src="js/fases.js"></script>
+    <script src="js/mapas/pecas/terreno.js"></script>
+    <script src="js/mapas/pecas/predios.js"></script>
+    <script src="js/mapas/pecas/veiculos.js"></script>
+    <script src="js/mapas/pecas/perigos.js"></script>
+    <script src="js/mapas/pecas/puzzles.js"></script>
+    <script src="js/mapas/fase01.js"></script>
+    <script src="js/mapas/fase02.js"></script>
+    <script src="js/mapas/fase03.js"></script>
+    <script src="js/mapas/fase04.js"></script>
+    <script src="js/mapas/fase05.js"></script>
+    <script src="js/mapas/construtor.js"></script>
+    <script src="js/equipamentos/itens.js"></script>
+    <script src="js/equipamentos/catalogo_armas.js"></script>
+    <script src="js/equipamentos/modelos_armas.js"></script>
+    <script src="js/equipamentos/armas.js"></script>
+    <script src="js/entidades/personagens.js"></script>
+    <script src="js/entidades/jogador.js"></script>
+    <script src="js/entidades/tipos_zumbis.js"></script>
+    <script src="js/entidades/zumbis.js"></script>
+    <script src="js/rede/multiplayer.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
