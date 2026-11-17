@@ -24,18 +24,28 @@ const Jogador = {
 
     inicializar(personagemId = "mateus") {
         this.personagemId = personagemId;
-        this.dadosClasse = (typeof getPersonagem === "function")
-            ? getPersonagem(personagemId)
-            : { vidaMax: 100, estaminaMax: 100, velocidadeBase: 8, multiplicadorCorrida: 1.45, forcaPulo: 9, habilidade: { cooldownSegundos: 15, duracaoSegundos: 8 } };
+        const bruto = (typeof getPersonagem === "function") ? getPersonagem(personagemId) : null;
+
+        this.dadosClasse = {
+            vidaMax: Number(bruto?.vidaMax || bruto?.vida || bruto?.hp || 100),
+            estaminaMax: Number(bruto?.estaminaMax || bruto?.estamina || 100),
+            velocidadeBase: Number(bruto?.velocidadeBase || bruto?.velocidade || 8.5),
+            multiplicadorCorrida: Number(bruto?.multiplicadorCorrida || 1.45),
+            forcaPulo: Number(bruto?.forcaPulo || 9.0),
+            habilidade: {
+                cooldownSegundos: Number(bruto?.habilidade?.cooldownSegundos || 15),
+                duracaoSegundos: Number(bruto?.habilidade?.duracaoSegundos || 8)
+            }
+        };
 
         this.vidaMax = this.dadosClasse.vidaMax;
         this.vida = this.vidaMax;
         this.estaminaMax = this.dadosClasse.estaminaMax;
         this.estamina = this.estaminaMax;
 
-        if (GameConfig.faseAtual === 2 && typeof SistemaProgresso !== "undefined" && SistemaProgresso.estado.posicaoHubSalva) {
+        if (GameConfig.faseAtual === 2 && typeof SistemaProgresso !== "undefined" && SistemaProgresso.estado?.posicaoHubSalva) {
             const p = SistemaProgresso.estado.posicaoHubSalva;
-            this.posicao.set(p.x, 1.75, p.z);
+            this.posicao.set(Number(p.x) || 0, 1.75, Number(p.z) || 0);
         } else {
             this.posicao.set(0, 1.75, 0);
         }
@@ -78,7 +88,7 @@ const Jogador = {
         window.addEventListener("keyup", (e) => { this.teclas[e.code] = false; });
 
         window.addEventListener("mousemove", (e) => {
-            if (document.pointerLockElement !== document.body) return;
+            if (!document.pointerLockElement) return;
             const sens = 0.0022 * (GameConfig.sensibilidade || 1.0);
             this.rotacaoYaw -= e.movementX * sens;
             this.rotacaoPitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, this.rotacaoPitch - e.movementY * sens));
@@ -171,6 +181,7 @@ const Jogador = {
     },
 
     atualizar(delta) {
+        if (!delta || isNaN(delta)) delta = 0.016;
         if (this.cooldownHabilidade > 0) this.cooldownHabilidade = Math.max(0, this.cooldownHabilidade - delta);
         if (this.tempoBuffAtivo > 0) this.tempoBuffAtivo = Math.max(0, this.tempoBuffAtivo - delta);
         if (this.estaIncapacitado()) return;
