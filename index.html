@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuga para o SENAI - Luiz Pagliato FPS</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <!-- Biblioteca 3D Three.js para o motor estilo Krunker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Biblioteca Supabase Realtime para o Multiplayer Co-op -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Fundo 3D / Canvas do Jogo -->
+    <div id="game-container"></div>
+
+    <!-- ==========================================
+         TELA INICIAL (LOBBY ESTILO KRUNKER / L4D)
+         ========================================== -->
+    <div id="tela-inicial" class="overlay-lobby">
+        
+        <!-- Barra Superior -->
+        <header class="lobby-topbar">
+            <div class="player-badge">
+                <span class="badge-icon">🎓</span>
+                <input type="text" id="input-nickname" value="Aluno_Sobrevivente" maxlength="16" title="Clique para alterar seu nome">
+            </div>
+
+            <div class="jornada-status">
+                <span class="rota-texto" id="txt-rota">NOVO MUNDO (VOTORANTIM) ➔ SENAI LUIZ PAGLIATO</span>
+                <div class="barra-jornada-fundo">
+                    <div class="barra-jornada-fill" id="progresso-jornada" style="width: 1.13%;"></div>
+                </div>
+            </div>
+
+            <div class="topbar-controls">
+                <div class="idioma-box">
+                    <span>🌐</span>
+                    <select id="select-idioma">
+                        <option value="pt">PT-BR</option>
+                        <option value="en">EN-US</option>
+                        <option value="es">ES</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Central em 2 Colunas Equilibradas -->
+        <main class="lobby-grid">
+            
+            <!-- COLUNA ESQUERDA: Título, Fase Atual, Personagem e Modos -->
+            <section class="painel-esquerda">
+                <div class="logo-area">
+                    <span class="tag-genero" id="txt-subgenero">SURVIVAL FPS • SOROCABA / VOTORANTIM</span>
+                    <h1 id="titulo-jogo">FUGA PARA O <span class="destaque-vermelho">SENAI</span></h1>
+                </div>
+
+                <!-- Card da Fase Atual -->
+                <div class="card-fase-atual">
+                    <div class="fase-header">
+                        <span class="fase-badge" id="label-fase-num">FASE 01 / 88</span>
+                        <span class="dificuldade-tag" id="label-fase-dif">NORMAL • ~10 MIN</span>
+                    </div>
+                    <h2 id="nome-fase-atual">O Surto no Terreno Baldio</h2>
+                    <p id="desc-fase-atual">Sobreviva por 10 minutos no terreno baldio do Jardim Novo Mundo enquanto ondas de infectados cercam o bairro.</p>
+                    <button id="btn-abrir-fases" class="btn-secundario-sm">🗺️ VER MAPA DAS 88 FASES</button>
+                </div>
+
+                <!-- Seletor dos 6 Sobreviventes -->
+                <div class="opcao-grupo" style="margin-bottom: 10px;">
+                    <label for="select-personagem" style="color: #00d2ff; font-weight: 700;">👤 SOBREVIVENTE / CLASSE:</label>
+                    <select id="select-personagem">
+                        <option value="mateus">Mateus — Comandante (Buff de Dano & Reset Cooldown)</option>
+                        <option value="nicolas">Nicolas Gregorio — Tanker (Armas Pesadas & Muita Vida)</option>
+                        <option value="luan">Luan — Engenheiro (Corpo a Corpo, Leves, Munição & Torreta)</option>
+                        <option value="rodrigo">Rodrigo — Médico (Rápido & Kit Médico 50% a cada 5 Kills)</option>
+                        <option
