@@ -3,8 +3,8 @@
    ========================================================================== */
 
 const Multiplayer = {
-    SUPABASE_URL: "https://wkhpxvjqwqgfjgqfjqwq.supabase.co",
-    SUPABASE_ANON_KEY: "", // Cole sua chave anon public do Supabase aqui
+    SUPABASE_URL: "https://nydtlrsouqwtlrrsokjr.supabase.co",
+    SUPABASE_ANON_KEY: "sb_publishable_WsUufY__IyGrsLZtmUSJfA_yMBc1lBn",
     cliente: null,
     canalSala: null,
     conectado: false,

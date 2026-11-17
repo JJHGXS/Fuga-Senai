@@ -1,64 +1,36 @@
 /* ==========================================================================
-   js/mapas/pecas/predios.js - Casas, Comércios, Muros, Barricadas e Oficinas
+   js/mapas/pecas/predios.js - Construções, Casas de Favela e Fachadas
    ========================================================================== */
 
 const PecaPredios = {
-    colisores: [],
-
-    limpar() {
-        this.colisores = [];
-    },
-
-    criarBlocoConstrucao(cena, x, z, largura, altura, profundidade, cor = 0x57606f) {
+    criarPredioLateral(cena, x, z, largura = 10, altura = 10, profundidade = 14, cor = 0x546e7a) {
         const geo = new THREE.BoxGeometry(largura, altura, profundidade);
         const mat = new THREE.MeshLambertMaterial({ color: cor });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(x, altura / 2, z);
         cena.add(mesh);
-
-        this.colisores.push(new THREE.Box3().setFromObject(mesh));
         return mesh;
     },
 
-    criarCasaSimples(cena, x, z, corParede = 0xd1ccc0) {
+    criarCasaFavela(cena, x, z, largura = 8, altura = 4.2, profundidade = 8) {
         const grupo = new THREE.Group();
+
+        // Estrutura principal em tijolo aparente
+        const paredeGeo = new THREE.BoxGeometry(largura, altura, profundidade);
+        const paredeMat = new THREE.MeshLambertMaterial({ color: 0x8c4a32 });
+        const paredes = new THREE.Mesh(paredeGeo, paredeMat);
+        paredes.position.y = altura / 2;
+        grupo.add(paredes);
+
+        // Laje de concreto no topo
+        const lajeGeo = new THREE.BoxGeometry(largura + 0.4, 0.35, profundidade + 0.4);
+        const lajeMat = new THREE.MeshLambertMaterial({ color: 0x6e6a63 });
+        const laje = new THREE.Mesh(lajeGeo, lajeMat);
+        laje.position.y = altura + 0.17;
+        grupo.add(laje);
+
         grupo.position.set(x, 0, z);
-
-        const corpo = new THREE.Mesh(
-            new THREE.BoxGeometry(9, 4.2, 10),
-            new THREE.MeshLambertMaterial({ color: corParede })
-        );
-        corpo.position.y = 2.1;
-
-        const telhado = new THREE.Mesh(
-            new THREE.BoxGeometry(9.6, 0.6, 10.6),
-            new THREE.MeshLambertMaterial({ color: 0x8c2d19 })
-        );
-        telhado.position.y = 4.5;
-
-        grupo.add(corpo, telhado);
         cena.add(grupo);
-        this.colisores.push(new THREE.Box3().setFromObject(corpo));
-    },
-
-    criarBarricada(cena, x, z, largura = 6) {
-        const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(largura, 1.35, 0.8),
-            new THREE.MeshLambertMaterial({ color: 0x6d4c41 })
-        );
-        mesh.position.set(x, 0.675, z);
-        cena.add(mesh);
-        this.colisores.push(new THREE.Box3().setFromObject(mesh));
-    },
-
-    // Estrutura icônica do SENAI Luiz Pagliato (Fase 88)
-    criarFachadaSenai(cena, x, z) {
-        this.criarBlocoConstrucao(cena, x, z, 36, 9, 14, 0xc0392b); // Prédio vermelho SENAI
-        const letreiro = new THREE.Mesh(
-            new THREE.BoxGeometry(16, 2.2, 0.5),
-            new THREE.MeshBasicMaterial({ color: 0xffffff })
-        );
-        letreiro.position.set(x, 6.5, z + 7.2);
-        cena.add(letreiro);
+        return grupo;
     }
 };
