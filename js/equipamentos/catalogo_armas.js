@@ -4,6 +4,7 @@
 
 const CATALOGO_ARMAS = {
     rifle_tatico: {
+        id: "rifle_tatico",
         nome: "RIFLE TÁTICO M4",
         dano: 32,
         cadencia: 0.12,
@@ -13,6 +14,7 @@ const CATALOGO_ARMAS = {
         automatica: true
     },
     metralhadora_pesada: {
+        id: "metralhadora_pesada",
         nome: "METRALHADORA PESADA M60",
         dano: 42,
         cadencia: 0.14,
@@ -22,6 +24,7 @@ const CATALOGO_ARMAS = {
         automatica: true
     },
     submetralhadora: {
+        id: "submetralhadora",
         nome: "SMG MP5 TÁTICA",
         dano: 24,
         cadencia: 0.08,
@@ -31,6 +34,7 @@ const CATALOGO_ARMAS = {
         automatica: true
     },
     escopeta_medica: {
+        id: "escopeta_medica",
         nome: "ESCOPETA DE COMBATE",
         dano: 95,
         cadencia: 0.65,
@@ -40,6 +44,7 @@ const CATALOGO_ARMAS = {
         automatica: false
     },
     sniper_barrett: {
+        id: "sniper_barrett",
         nome: "SNIPER DE PRECISÃO",
         dano: 165,
         cadencia: 0.95,
@@ -49,6 +54,7 @@ const CATALOGO_ARMAS = {
         automatica: false
     },
     ak47_berserker: {
+        id: "ak47_berserker",
         nome: "FUZIL AK-47 ASSAULT",
         dano: 38,
         cadencia: 0.13,
@@ -58,6 +64,7 @@ const CATALOGO_ARMAS = {
         automatica: true
     },
     pistola_reserva: {
+        id: "pistola_reserva",
         nome: "PISTOLA 9MM (RESERVA)",
         dano: 22,
         cadencia: 0.22,
@@ -65,8 +72,23 @@ const CATALOGO_ARMAS = {
         reservaMax: 999,
         alcance: 65,
         automatica: false
+    },
+    faca_tatica: {
+        id: "faca_tatica",
+        nome: "FACA TÁTICA (CORPO A CORPO)",
+        dano: 65,
+        cadencia: 0.45,
+        carregadorMax: 1,
+        reservaMax: 1,
+        alcance: 3.2,
+        automatica: false,
+        corpoACorpo: true
     }
 };
+
+function getArma(idArma) {
+    return CATALOGO_ARMAS[idArma] || CATALOGO_ARMAS.rifle_tatico;
+}
 
 function getArmaPorPersonagem(personagemId) {
     const mapa = {
@@ -77,5 +99,5 @@ function getArmaPorPersonagem(personagemId) {
         kaua: "sniper_barrett",
         joao_cba: "ak47_berserker"
     };
-    return CATALOGO_ARMAS[mapa[personagemId] || "rifle_tatico"];
+    return getArma(mapa[personagemId]);
 }
